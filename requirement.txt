@@ -1,0 +1,4 @@
+python-dotenv
+dotenv
+mysql
+mysql-connector-python
