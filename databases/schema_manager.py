@@ -106,3 +106,4 @@ def validate_mysql_schema(connection, cursor):
         raise ValueError("-------repository not found------")
 
     print("------Validated schema successfully------")
+
