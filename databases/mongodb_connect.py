@@ -9,12 +9,15 @@ class MongoDBConnect:
         self.db = None
 
     def connect(self):
-        self.client = MongoClient(self.mongo_uri)
-        self.client.server_info()   #test connection
-        self.db = self.client[self.db_name]
+        try:
+            self.client = MongoClient(self.mongo_uri)
+            self.client.server_info()   #test connection
+            self.db = self.client[self.db_name]
 
-        print(f"------Connected to MongoDB: {self.db_name}-------")
-
+            print(f"------Connected to MongoDB: {self.db_name}-------")
+            return self.db
+        except ConnectionFailure as e:
+            raise Exception(f"----failed to connect MongoDB: {e}----") from e
     def close(self):
         if self.client:
             self.client.close()

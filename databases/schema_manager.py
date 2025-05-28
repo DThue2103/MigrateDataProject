@@ -107,3 +107,21 @@ def validate_mysql_schema(connection, cursor):
 
     print("------Validated schema successfully------")
 
+def create_mongodb_schema(db):
+    db.drop_collection("repositories")
+    db.create_collection("repositories", validator={
+        "$jsonSchema": {
+            "bsonType" : "object",
+            "required": ["repositories_id", "name"],
+            "properties":{
+                "repositories_id": {
+                    "bsonType": "int"},
+                "name": {
+                    "bsonType": "string"},
+                "url": {
+                    "bsonType": ["string", "null"]}
+            }
+        }
+    })
+    db.repositories.create_index("repositories_id")
+    print("-----Created collection repositories in mongodb------")
