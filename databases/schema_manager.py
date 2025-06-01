@@ -20,24 +20,44 @@ def create_mysql_schema(connection, cursor):
     print(f"--------create {database} successfully-------")
     connection.database = database  #kết nối vào database github_data
 
+    tables_name = []
     try:
         with open(SQL_FILE_PATH, "r") as file:
-            sql_script = file.read()
-            # sql_commands = [cmd.strip() for cmd in sql_script.split(";") if cmd.strip()]
-            sql_commands =[]
-            for cmd in sql_script.strip().split(";"):
-                if cmd.strip():
-                    sql_commands.append(cmd)
-
-            for cmd in sql_commands:
+            sql_script = file.read().strip()
+            sql_commands = [cmd for cmd in sql_script.split(" ")]
+            # for cmd in sql_script.strip().split(";"):
+            #     if cmd.strip():
+            #         sql_commands.append(cmd)
+            for cmd in sql_script.split(";"):
+                # print(cmd)
                 cursor.execute(cmd)
                 print(f"------Excuted mysql commands------")
+
             connection.commit()
             print("-------Created MySQL schema-------")
+
+            # print(sql_commands)
+
+            #lấy các table trong file
+            key = "EXISTS"
+            key1 = "TABLE"
+
+            for i in range(len(sql_commands)):
+                if sql_commands[i] == key:
+                    table_name = re.sub(r'[^a-zA-Z0-9]', '', sql_commands[i + 1])
+                    tables_name.append(table_name)
+
+                elif sql_commands[i] == key1 and sql_commands[i + 1] != "IF":
+                    table_name = re.sub(r'[^a-zA-Z0-9]', '', sql_commands[i + 1])
+                    tables_name.append(table_name)
+
+            # print(tables_name)
+            return tables_name
 
     except Error as e:
         connection.rollback()
         raise Exception(f"-----Failed to create MySQL schema: {e}---") from e
+
 
 #validate data
 """
@@ -45,7 +65,7 @@ def create_mysql_schema(connection, cursor):
 - validate column
 """
 
-def validate_mysql_schema(connection, cursor):
+def validate_mysql_schema(tables_name, connection, cursor):
     #validate table
     cursor.execute("SHOW TABLES")
     #tables = [row[0] for row in cursor.fetchall()]  #table name in db
@@ -64,39 +84,12 @@ def validate_mysql_schema(connection, cursor):
     #     raise ValueError(f"------Tables doesn't exist----")
     #print("------Validated table successfully-----")
 
-    #kiểm tra bằng cách tìm tables_name trong file:
-    tables_name = []    #table name in file
-    try:
-        with open(SQL_FILE_PATH, "r") as file:
-            sql_script = file.read().strip()
-            sql_commands = [cmd.lower() for cmd in sql_script.split(" ")]
-            # print(sql_commands)
-            key = "exists"
-            key1 = "table"
-            for i  in range(len(sql_commands)):
-                if sql_commands[i] == key:
-                    table_name = re.sub(r'[^a-zA-Z0-9]', '', sql_commands[i + 1])
-                    tables_name.append(table_name)
-
-                elif sql_commands[i] == key1 and sql_commands[i + 1] != "if":
-                    table_name = re.sub(r'[^a-zA-Z0-9]', '', sql_commands[i + 1])
-                    tables_name.append(table_name)
-
-            print(tables_name)
-
-    except Error as e:
-        print(f"-------Failed to open file {file}------")
-    except FileNotFoundError:
-        print(f"-----File {file} doesn't exist-------")
-
     for table in tables_name:
         if table not in tables:
             raise ValueError(f"------Tables doesn't exist----")
 
-        # else:
-        #     print(f"-----validated table {table} in database-------")
 
-    # print("------Validated table successfully-----")
+    print("------Validated table successfully-----")
 
     #validate column
     cursor.execute("SELECT * FROM repositories WHERE repositories_id = 1")
