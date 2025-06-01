@@ -125,3 +125,16 @@ def create_mongodb_schema(db):
     })
     db.repositories.create_index("repositories_id")
     print("-----Created collection repositories in mongodb------")
+
+def validate_mongodb_schema(db):
+    collections = db.list_collection_names()
+    # print(f"----collections: {collections}------")
+    if "repositories" not in collections:
+        raise ValueError("------collection doesn't exist-----")
+
+    repository = db.repositories.find_one({"repositories_id": 1})
+    # print(repository)
+    if not repository:
+        raise ValueError("---------repositories_id not found in MongoDB-----")
+
+    print("----------Validated schema successfully-------")

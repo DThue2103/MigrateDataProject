@@ -2,7 +2,7 @@ from MySQLdb import connect
 
 from MigrateDataProject.databases.mysql_connect import MySQLConnect
 from MigrateDataProject.config.database_config import MySQLConfig, get_database_config
-from MigrateDataProject.databases.schema_manager import create_mysql_schema, validate_mysql_schema, create_mongodb_schema
+from MigrateDataProject.databases.schema_manager import create_mysql_schema, validate_mysql_schema, create_mongodb_schema, validate_mongodb_schema
 from MigrateDataProject.config.database_config import MongoDBConfig
 from MigrateDataProject.databases.mongodb_connect import MongoDBConnect
 def main(config):
@@ -26,7 +26,7 @@ def main(config):
             "url": "https://125jjvh.com"
         })
         print("-----insert one document to mongodb----")
-
+        validate_mongodb_schema(mongodb_client.connect())
 if __name__ == '__main__':
     config = get_database_config()
     # print(config)
