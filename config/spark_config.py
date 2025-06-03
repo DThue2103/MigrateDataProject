@@ -42,7 +42,7 @@ class SparkConnect:
             builder.config("spark.executor.instances", num_executor)
         if jar_packages:
             jar_path = ",".join([jar_package for jar_package in jar_packages])
-            builder.config("spark.jars", jar_path)
+            builder.config("spark.jars.packages", jar_path)
 
         # if not isinstance(spark_conf, dict):
         #     spark_conf = {}
