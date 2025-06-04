@@ -6,6 +6,8 @@ from pathlib import Path
 from mysql.connector.errors import Error
 SQL_FILE_PATH = Path("../sql/schema.sql")
 
+from MigrateDataProject.config.database_config import get_database_config
+
 #tạo schema
 """
 cách để python tạo schema:
@@ -13,7 +15,8 @@ cách để python tạo schema:
     b2: thực thi câu lệnh trong file schema.sql (thông qua cursor)
 """
 def create_mysql_schema(connection, cursor):
-    database = "github_data" #databse name
+    # database = "github_data" #databse name
+    database = get_database_config()["mysql"].database
     cursor.execute(f"DROP DATABASE IF EXISTS {database}")   #drop db nếu đã tồn tại
     cursor.execute(f"CREATE DATABASE IF NOT EXISTS {database}")  #tạo database
     connection.commit()
