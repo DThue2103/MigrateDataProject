@@ -111,7 +111,7 @@ def create_mongodb_schema(db):
             "required": ["repositories_id", "name"],
             "properties":{
                 "repositories_id": {
-                    "bsonType": "int"},
+                    "bsonType": "long"},
                 "name": {
                     "bsonType": "string"},
                 "url": {
@@ -119,7 +119,7 @@ def create_mongodb_schema(db):
             }
         }
     })
-    db.repositories.create_index("repositories_id")
+    # db.repositories.create_index("repositories_id")
     print("-----Created collection repositories in mongodb------")
 
 def validate_mongodb_schema(db):

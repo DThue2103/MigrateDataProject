@@ -1,4 +1,5 @@
 from MySQLdb import connect
+from bson import Int64
 
 from MigrateDataProject.databases.mysql_connect import MySQLConnect
 from MigrateDataProject.config.database_config import MySQLConfig, get_database_config
@@ -17,16 +18,16 @@ def main(config):
         print("-------Inserted data to MySQL------")
         validate_mysql_schema(tables_name,connection, cursor)
 
-    # #MONGODB
-    # with MongoDBConnect(config["mongodb"].uri, config["mongodb"].db_name) as mongodb_client:
-    #     create_mongodb_schema(mongodb_client.connect())
-    #     mongodb_client.db.repositories.insert_one({
-    #         "repositories_id": 1,
-    #         "name": "Hue",
-    #         "url": "https://125jjvh.com"
-    #     })
-    #     print("-----insert one document to mongodb----")
-    #     validate_mongodb_schema(mongodb_client.connect())
+    #MONGODB
+    with MongoDBConnect(config["mongodb"].uri, config["mongodb"].db_name) as mongodb_client:
+        create_mongodb_schema(mongodb_client.connect())
+        mongodb_client.db.repositories.insert_one({
+            "repositories_id": Int64(1),
+            "name": "Hue",
+            "url": "https://125jjvh.com"
+        })
+        print("-----insert one document to mongodb----")
+        validate_mongodb_schema(mongodb_client.connect())
 if __name__ == '__main__':
     config = get_database_config()
     # print(config)

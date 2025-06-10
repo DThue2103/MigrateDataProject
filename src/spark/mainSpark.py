@@ -8,7 +8,8 @@ from MigrateDataProject.config.database_config import get_spark_config
 from MigrateDataProject.src.spark.spark_write_data import SparkWriteDatabase
 def main():
     jars = [
-        "mysql:mysql-connector-java:8.0.33"
+        "mysql:mysql-connector-java:8.0.33",
+        "org.mongodb.spark:mongo-spark-connector_2.12:3.0.1"
     ]
 
     spark_connect = SparkConnect(
@@ -46,6 +47,8 @@ def main():
 
     spark_configs = get_spark_config()
     df_write = SparkWriteDatabase(spark_connect.spark, spark_configs)
-    df_write.spark_write_mysql(df_write_table, spark_configs["mysql"]["table"], spark_configs["mysql"]["jdbc_url"], spark_configs["mysql"]["config"])
+    # df_write.spark_write_mysql(df_write_table, spark_configs["mysql"]["table"], spark_configs["mysql"]["jdbc_url"], spark_configs["mysql"]["config"])
+    # df_write.spark_write_mongodb(df_write_table, spark_configs["mongodb"]["uri"], spark_configs["mongodb"]["database"], spark_configs["mongodb"]["collection"])
+    df_write.spark_write_all_database(df_write_table)
 if __name__ == '__main__':
     main()
