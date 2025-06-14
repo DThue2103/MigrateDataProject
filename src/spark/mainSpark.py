@@ -82,7 +82,7 @@ def main():
 
 
     #validate spark write mysql
-    df_temp = df_write_table.subtract(df_read)
+    df_temp = df_write_table.exceptAll(df_read)
     df_temp.show()
     while df_temp.count() != 0:
         df_write.spark_write_mysql(df_temp, spark_configs["mysql"]["table"], spark_configs["mysql"]["jdbc_url"], spark_configs["mysql"]["config"])
