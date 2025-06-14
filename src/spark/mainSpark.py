@@ -1,6 +1,6 @@
 from pyspark.sql import SparkSession
 
-from pyspark.sql.functions import col
+from pyspark.sql.functions import col, lit
 from pyspark.sql.types import *
 
 from MigrateDataProject.config.spark_config import SparkConnect
@@ -11,7 +11,7 @@ def main():
         "mysql:mysql-connector-java:8.0.33",
         "org.mongodb.spark:mongo-spark-connector_2.12:3.0.1"
     ]
-
+    #create spark context
     spark_connect = SparkConnect(
         app_name="DE-103",
         master_url="local[*]",
@@ -22,6 +22,8 @@ def main():
         jar_packages = jars,
         log_level="INFO"
     )
+
+    #create schema
     schema = StructType([
         StructField("actor", StructType([
             StructField("id", LongType(), True),
@@ -36,19 +38,28 @@ def main():
             StructField("url", StringType(), True)
         ]), True)
     ])
+
+    #create df
     df = spark_connect.spark.read.schema(schema).json(r"D:\PythonProject\MigrateDataProject\Data\2015-03-01-17.json")
 
-    df_write_table = df.select(
+    df_write_table = df.withColumn("spark_temp", lit("spark_write")).select(
         col("repo.id").alias("repositories_id"),
         col("repo.name").alias("name"),
-        col("repo.url").alias("url")
+        col("repo.url").alias("url"),
+        col("spark_temp")
     )
     # df_write_table.show()
 
     spark_configs = get_spark_config()
     df_write = SparkWriteDatabase(spark_connect.spark, spark_configs)
+
+    #write data to database
     # df_write.spark_write_mysql(df_write_table, spark_configs["mysql"]["table"], spark_configs["mysql"]["jdbc_url"], spark_configs["mysql"]["config"])
     # df_write.spark_write_mongodb(df_write_table, spark_configs["mongodb"]["uri"], spark_configs["mongodb"]["database"], spark_configs["mongodb"]["collection"])
     df_write.spark_write_all_database(df_write_table)
+
+    #validate data from database
+    df_write.validate_spark_mysql(spark_configs["mysql"]["table"], spark_configs["mysql"]["jdbc_url"], spark_configs["mysql"]["config"])
+
 if __name__ == '__main__':
     main()
