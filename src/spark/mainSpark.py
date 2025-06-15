@@ -64,10 +64,6 @@ def main():
     df_write.spark_write_all_database(df_write_table)
     # df_write_table.show()
 
-    #validate data from database
-    df_read = df_write.validate_spark_mysql(spark_configs["mysql"]["table"], spark_configs["mysql"]["jdbc_url"], spark_configs["mysql"]["config"])
-    # df_read.show()
-
     #delete db to check
     with MySQLConnect(spark_configs["mysql"]["config"]["host"], spark_configs["mysql"]["config"]["port"], spark_configs["mysql"]["config"]["user"],
                       spark_configs["mysql"]["config"]["password"]) as mysql_client:
@@ -82,14 +78,7 @@ def main():
 
 
     #validate spark write mysql
-    df_temp = df_write_table.exceptAll(df_read)
-    df_temp.show()
-    while df_temp.count() != 0:
-        df_write.spark_write_mysql(df_temp, spark_configs["mysql"]["table"], spark_configs["mysql"]["jdbc_url"], spark_configs["mysql"]["config"])
-        df_read = df_write.validate_spark_mysql(spark_configs["mysql"]["table"], spark_configs["mysql"]["jdbc_url"], spark_configs["mysql"]["config"])
-        df_temp = df_write_table.subtract(df_read)
-        df_temp.show()
-    print(f"--------validate spark write data to mysql table {spark_configs['mysql']['table']} successfully-------")
+    df_write.validate_spark_mysql(df_write_table, spark_configs["mysql"]["table"], spark_configs["mysql"]["jdbc_url"], spark_configs["mysql"]["config"])
 
 if __name__ == '__main__':
     main()

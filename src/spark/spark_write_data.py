@@ -48,7 +48,7 @@ class SparkWriteDatabase:
 
         print(f"------spark write data to mysql table: {table_name} successfully------")
 
-    def validate_spark_mysql(self, table_name : str, jdbc_url : str, config : Dict):
+    def read_spark_mysql(self, table_name : str, jdbc_url : str, config : Dict):
         df_read = self.spark.read \
             .format("jdbc") \
             .option("url", jdbc_url) \
@@ -57,9 +57,19 @@ class SparkWriteDatabase:
             .option("password", config["password"]) \
             .option("driver", "com.mysql.cj.jdbc.Driver") \
             .load()
-        # df_read.show()
-        # print(f"-------spark load data from mysql table: {table_name} successfully!!!!!!!")
         return df_read
+
+    def validate_spark_mysql(self, df_write_table : DataFrame , table_name : str, jdbc_url : str, config : Dict):
+        df_read = self.read_spark_mysql(table_name, jdbc_url, config)
+        df_temp = df_write_table.exceptAll(df_read)
+        df_temp.show()
+        while df_temp.count() != 0:
+            self.spark_write_mysql(df_temp, table_name, jdbc_url, config)
+            df_read = self.read_spark_mysql(table_name, jdbc_url, config)
+            df_temp = df_write_table.exceptAll(df_read)
+            df_temp.show()
+        print(f"--------validate spark write data to mysql table {self.db_config['mysql']['table']} successfully-------")
+
     def spark_write_mongodb(self, df : DataFrame, uri : str, database : str, collection : str, mode : str="append"):
         df.write \
             .format("mongo") \
