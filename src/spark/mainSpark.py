@@ -82,19 +82,19 @@ def main():
 
     # validate spark write data into mongodb
 
-    #delete db to check
-    with MongoDBConnect(spark_configs["mongodb"]["uri"], spark_configs["mongodb"]["database"]) as mongodb_client:
-        docs_to_delete = mongodb_client.db.repositories.find(
-                    {"spark_temp": "spark_write"},
-                    {"_id": 1}
-                ).limit(600)
-
-        ids = [doc["_id"] for doc in docs_to_delete]
-
-        # Xoá chúng
-        if ids:
-            result = mongodb_client.db.repositories.delete_many({"_id": {"$in": ids}})
-        print("-----delete records to check validate spark write data into mongodb--------")
+    # #delete db to check
+    # with MongoDBConnect(spark_configs["mongodb"]["uri"], spark_configs["mongodb"]["database"]) as mongodb_client:
+    #     docs_to_delete = mongodb_client.db.repositories.find(
+    #                 {"spark_temp": "spark_write"},
+    #                 {"_id": 1}
+    #             ).limit(600)
+    #
+    #     ids = [doc["_id"] for doc in docs_to_delete]
+    #
+    #     # Xoá chúng
+    #     if ids:
+    #         result = mongodb_client.db.repositories.delete_many({"_id": {"$in": ids}})
+    #     print("-----delete records to check validate spark write data into mongodb--------")
 
     df_write.validate_spark_mongodb(df_write_table, spark_configs["mongodb"]["uri"], spark_configs["mongodb"]["database"], spark_configs["mongodb"]["collection"])
 

@@ -19,18 +19,10 @@ class SparkWriteDatabase:
                 connection, cursor = mysql_client.connection, mysql_client.cursor
                 database = get_database_config()["mysql"].database
                 connection.database = database
+                cursor.execute(f"ALTER TABLE {table_name} ADD COLUMN spark_temp VARCHAR(255);")
+                connection.commit()
+                print("----- add column spark_temp to mysql--------")
 
-                cursor.execute(f"DESC {table_name};")
-                tables = []  # table name in db
-                row = cursor.fetchone()
-                while row:
-                    tables.append(row[0])
-                    row = cursor.fetchone()
-
-                if "spark_temp" not in tables:
-                    cursor.execute(f"ALTER TABLE {table_name} ADD COLUMN spark_temp VARCHAR(255);")
-                    connection.commit()
-                    print("----- add column spark_temp to mysql--------")
                 mysql_client.close()
         except Exception as e:
             raise Exception(f"-----failed to connect to mysql: {e}------")
