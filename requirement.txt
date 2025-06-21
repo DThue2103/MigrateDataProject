@@ -1,5 +1,6 @@
 python-dotenv
 dotenv
 mysql
+mysqlclient
 mysql-connector-python
 pymongo

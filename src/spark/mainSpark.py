@@ -9,6 +9,7 @@ from MigrateDataProject.src.spark.spark_write_data import SparkWriteDatabase
 
 from MigrateDataProject.databases.mysql_connect import MySQLConnect
 from MigrateDataProject.config.database_config import get_database_config
+from MigrateDataProject.databases.mongodb_connect import MongoDBConnect
 
 
 def main():
@@ -45,7 +46,7 @@ def main():
     ])
 
     #create df
-    df = spark_connect.spark.read.schema(schema).json(r"D:\PythonProject\MigrateDataProject\Data\2015-03-01-17.json")
+    df = spark_connect.spark.read.schema(schema).json(r"/home/huedt/Documents/PythonProjects/MigrateDataProject/Data/2015-03-01-17.json")
 
     df_write_table = df.withColumn("spark_temp", lit("spark_write")).select(
         col("repo.id").alias("repositories_id"),
@@ -64,21 +65,38 @@ def main():
     df_write.spark_write_all_database(df_write_table)
     # df_write_table.show()
 
-    #delete db to check
-    with MySQLConnect(spark_configs["mysql"]["config"]["host"], spark_configs["mysql"]["config"]["port"], spark_configs["mysql"]["config"]["user"],
-                      spark_configs["mysql"]["config"]["password"]) as mysql_client:
-        connection, cursor = mysql_client.connection, mysql_client.cursor
-        database = get_database_config()["mysql"].database
-        connection.database = database
-        table_name = spark_configs["mysql"]["table"]
-        cursor.execute(f"DELETE FROM {table_name} WHERE repositories_id = 31502849")
-        connection.commit()
-        print("------delete 1 record to check validate spark write data--------")
-        mysql_client.close()
+    # #delete db to check
+    # with MySQLConnect(spark_configs["mysql"]["config"]["host"], spark_configs["mysql"]["config"]["port"], spark_configs["mysql"]["config"]["user"],
+    #                   spark_configs["mysql"]["config"]["password"]) as mysql_client:
+    #     connection, cursor = mysql_client.connection, mysql_client.cursor
+    #     database = get_database_config()["mysql"].database
+    #     connection.database = database
+    #     table_name = spark_configs["mysql"]["table"]
+    #     cursor.execute(f"DELETE FROM {table_name} WHERE spark_temp = 'spark_write' LIMIT 600")
+    #     connection.commit()
+    #     print("------delete records to check validate spark write data--------")
+    #     mysql_client.close()
 
-
-    #validate spark write mysql
+    #validate spark write data into mysql
     df_write.validate_spark_mysql(df_write_table, spark_configs["mysql"]["table"], spark_configs["mysql"]["jdbc_url"], spark_configs["mysql"]["config"])
+
+    # validate spark write data into mongodb
+
+    #delete db to check
+    with MongoDBConnect(spark_configs["mongodb"]["uri"], spark_configs["mongodb"]["database"]) as mongodb_client:
+        docs_to_delete = mongodb_client.db.repositories.find(
+                    {"spark_temp": "spark_write"},
+                    {"_id": 1}
+                ).limit(600)
+
+        ids = [doc["_id"] for doc in docs_to_delete]
+
+        # Xoá chúng
+        if ids:
+            result = mongodb_client.db.repositories.delete_many({"_id": {"$in": ids}})
+        print("-----delete records to check validate spark write data into mongodb--------")
+
+    df_write.validate_spark_mongodb(df_write_table, spark_configs["mongodb"]["uri"], spark_configs["mongodb"]["database"], spark_configs["mongodb"]["collection"])
 
 if __name__ == '__main__':
     main()

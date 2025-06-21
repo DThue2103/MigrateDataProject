@@ -1,7 +1,7 @@
 #mục tiêu của schema_manager: tạo schema và validate schema cho database
 import re
-from msilib.schema import tables
-from operator import index
+# from msilib.schema import tables
+# from operator import index
 from pathlib import Path
 from mysql.connector.errors import Error
 SQL_FILE_PATH = Path("../sql/schema.sql")

@@ -18,6 +18,7 @@ class MongoDBConnect:
             return self.db
         except ConnectionFailure as e:
             raise Exception(f"----failed to connect MongoDB: {e}----") from e
+
     def close(self):
         if self.client:
             self.client.close()
