@@ -19,10 +19,18 @@ class SparkWriteDatabase:
                 connection, cursor = mysql_client.connection, mysql_client.cursor
                 database = get_database_config()["mysql"].database
                 connection.database = database
-                cursor.execute(f"ALTER TABLE {table_name} ADD COLUMN spark_temp VARCHAR(255);")
-                connection.commit()
-                print("----- add column spark_temp to mysql--------")
 
+                cursor.execute(f"DESC {table_name};")
+                tables = []  # table name in db
+                row = cursor.fetchone()
+                while row:
+                    tables.append(row[0])
+                    row = cursor.fetchone()
+
+                if "spark_temp" not in tables:
+                    cursor.execute(f"ALTER TABLE {table_name} ADD COLUMN spark_temp VARCHAR(255);")
+                    connection.commit()
+                    print("----- add column spark_temp to mysql--------")
                 mysql_client.close()
         except Exception as e:
             raise Exception(f"-----failed to connect to mysql: {e}------")
@@ -51,7 +59,7 @@ class SparkWriteDatabase:
     #         .load()
     #     return df_read
 
-    def validate_spark_mysql(self, df_write_table : DataFrame , table_name : str, jdbc_url : str, config : Dict):
+    def validate_spark_mysql(self, df_write_table : DataFrame , table_name : str, jdbc_url : str, config : Dict, mode : str = "append"):
         try:
             df_read = self.spark.read \
                 .format("jdbc") \
@@ -66,7 +74,16 @@ class SparkWriteDatabase:
             # df_temp.show()
             # print(df_temp.count())
             if df_temp.count() != 0:
-                self.spark_write_mysql(df_temp, table_name, jdbc_url, config)
+                df_temp.write \
+                    .format("jdbc") \
+                    .option("url", jdbc_url) \
+                    .option("dbtable", table_name) \
+                    .option("user", config["user"]) \
+                    .option("password", config["password"]) \
+                    .option("driver", "com.mysql.cj.jdbc.Driver") \
+                    .mode(mode) \
+                    .save()
+                print(f"------spark inserted missing data to mysql table: {table_name} successfully------")
 
             try:
                 with MySQLConnect(config["host"], config["port"], config["user"],
@@ -102,7 +119,7 @@ class SparkWriteDatabase:
             .save()
         print(f"------spark write data to mongodb collection: {collection} successfully----------")
 
-    def validate_spark_mongodb(self, df_write : DataFrame, uri : str, database : str, collection : str):
+    def validate_spark_mongodb(self, df_write : DataFrame, uri : str, database : str, collection : str, mode : str = "append"):
         try:
             df_read = self.spark.read \
                 .format("mongo") \
@@ -119,7 +136,14 @@ class SparkWriteDatabase:
             # df_temp.show()
             # print(df_temp.count())
             if df_temp.count() != 0:
-                self.spark_write_mongodb(df_temp, uri, database, collection)
+                df_temp.write \
+                    .format("mongo") \
+                    .option("uri", uri) \
+                    .option("database", database) \
+                    .option("collection", collection) \
+                    .mode(mode) \
+                    .save()
+                print(f"------spark inserted missing data to mongodb collection: {collection} successfully----------")
 
             try:
                 with MongoDBConnect(uri, database) as mongodb_client:
