@@ -93,6 +93,84 @@ class SparkWriteDatabase:
         except Exception as e:
             raise Exception(f"-----Failed to write missing records to mysql: {e}---") from e
 
+    def spark_write_mysql_primary_key(self, df : DataFrame, table_name : str, jdbc_url : str, config : Dict, mode : str = "append"):
+        df.write \
+            .format("jdbc") \
+            .option("url", jdbc_url) \
+            .option("dbtable", table_name) \
+            .option("user", config["user"]) \
+            .option("password", config["password"]) \
+            .option("driver", "com.mysql.cj.jdbc.Driver") \
+            .mode(mode) \
+            .save()
+
+        print(f"-----spark write data to mysql table: {table_name} successfully-------")
+
+    def validate_spark_write_primary_key(self, df_write : DataFrame, table_name : str, jdbc_url : str, config : Dict, mode : str = "append"):
+        try:
+            df_read = self.spark.read \
+                .format("jdbc") \
+                .option("url", jdbc_url) \
+                .option("dbtable", table_name) \
+                .option("user", config["user"]) \
+                .option("password", config["password"]) \
+                .option("driver", "com.mysql.cj.jdbc.Driver") \
+                .load()
+            # df_read.show()
+            df_temp = df_write.exceptAll(df_read)
+            # print(df_temp.count())
+            if df_temp.count() != 0:
+                df_temp.write \
+                    .format("jdbc") \
+                    .option("url", jdbc_url) \
+                    .option("dbtable", table_name) \
+                    .option("user", config["user"]) \
+                    .option("password", config["password"]) \
+                    .option("driver", "com.mysql.cj.jdbc.Driver") \
+                    .mode(mode) \
+                    .save()
+            print(f"-------validate spark write data to mysql table {table_name} successfully------")
+        except Exception as e:
+            raise Exception(f"----failed to write missing record to spark_table_temp in mysql----")
+
+    def insert_data_mysql_primary_key(self, config : Dict):
+        try:
+            with MySQLConnect(config["host"], config["port"], config["user"],
+                          config["password"]) as mysql_client:
+                connection, cursor = mysql_client.connection, mysql_client.cursor
+                database = get_database_config()["mysql"].database
+                connection.database = database
+                cursor.execute("SELECT a. * FROM spark_table_temp a LEFT JOIN repositories b ON a.repositories_id = b.repositories_id WHERE b.repositories_id IS NULL;")
+                records = []
+                row = cursor.fetchone()
+                # print(row)
+                while row:
+                    records.append(row)
+                    row = cursor.fetchone()
+
+                # print(records)
+                for rec in records:
+                    try:
+                        cursor.execute("INSERT INTO repositories (repositories_id, name, url) VALUES (%s, %s, %s)", rec)
+                        connection.commit()
+                        print(f"-----insert {rec} into mysql successfully-----")
+                    except Exception as e:
+                        print(f"Error inserting record {rec}: {str(e)}")
+                        continue
+            print("-----insert data into mysql successfully-----")
+
+            with MySQLConnect(config["host"], config["port"], config["user"],
+                              config["password"]) as mysql_client:
+                connection, cursor = mysql_client.connection, mysql_client.cursor
+                database = get_database_config()["mysql"].database
+                connection.database = database
+                cursor.execute("DROP TABLE spark_table_temp;")
+                connection.commit()
+                print("------drop table spark_table_temp successfully-----")
+
+        except Exception as e:
+            raise Exception(f"-----failed to connect to mysql: {e}------")
+
     def spark_write_mongodb(self, df : DataFrame, uri : str, database : str, collection : str, mode : str="append"):
         try:
             with MongoDBConnect(uri, database) as mongodb_client:
