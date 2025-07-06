@@ -1,4 +1,3 @@
-from sqlalchemy.engine import connection_memoize
 from MigrateDataProject.config.database_config import get_database_config
 from MigrateDataProject.databases.mysql_connect import MySQLConnect
 

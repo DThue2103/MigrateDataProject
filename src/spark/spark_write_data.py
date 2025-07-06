@@ -172,12 +172,12 @@ class SparkWriteDatabase:
             raise Exception(f"-----failed to connect to mysql: {e}------")
 
     def spark_write_mongodb(self, df : DataFrame, uri : str, database : str, collection : str, mode : str="append"):
-        try:
-            with MongoDBConnect(uri, database) as mongodb_client:
-                mongodb_client.db.repositories.update_many({}, {"$set": {"source": "spark_temp"}})
-                print("-----insert spark_temp field into mongodb----")
-        except Exception as e:
-            raise Exception(f"-----failed to connect to mongodb: {e}------")
+        # try:
+        #     with MongoDBConnect(uri, database) as mongodb_client:
+        #         mongodb_client.db.repositories.update_many({}, {"$set": {"source": "spark_temp"}})
+        #         print("-----insert spark_temp field into mongodb----")
+        # except Exception as e:
+        #     raise Exception(f"-----failed to connect to mongodb: {e}------")
 
         df.write \
             .format("mongo") \
@@ -195,7 +195,7 @@ class SparkWriteDatabase:
                 .option("uri", uri) \
                 .option("database", database) \
                 .option("collection", collection) \
-                .option("pipeline", '[{ "$match": { "spark_temp": "spark_write" } }, { "$unset": "_id" }]') \
+                .option("pipeline", '[{ "$match": { "spark_temp": "spark_write" } }]') \
                 .load()
 
             df_read = df_read.select("repositories_id", "name", "url", "spark_temp")
@@ -230,3 +230,8 @@ class SparkWriteDatabase:
         self.spark_write_mongodb(df, self.db_config["mongodb"]["uri"], self.db_config["mongodb"]["database"],
                                  self.db_config["mongodb"]["collection"])
         print(f"----------spark write data to mysql, mongodb successfully--------")
+
+    def spark_validate_all_database(self, df_write : DataFrame):
+        self.validate_spark_mysql(df_write, self.db_config["mysql"]["table"], self.db_config["mysql"]["jdbc_url"], self.db_config["mysql"]["config"])
+        self.validate_spark_mongodb(df_write, self.db_config["mongodb"]["uri"], self.db_config["mongodb"]["database"], self.db_config["mongodb"]["collection"])
+        print(f"------spark validate data to mysql, mongodb successfully------")

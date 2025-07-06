@@ -48,18 +48,18 @@ def main():
     #create df
     df = spark_connect.spark.read.schema(schema).json(r"/home/huedt/Documents/PythonProjects/MigrateDataProject/Data/2015-03-01-17.json")
 
-    df_write_table = df.select(
+    # df_write_table = df.select(
+    #     col("repo.id").alias("repositories_id"),
+    #     col("repo.name").alias("name"),
+    #     col("repo.url").alias("url")
+    # )
+
+    df_write_table = df.withColumn("spark_temp", lit("spark_write")).select(
         col("repo.id").alias("repositories_id"),
         col("repo.name").alias("name"),
         col("repo.url").alias("url"),
+        col("spark_temp").alias("spark_temp")
     )
-
-    # df_write_table = df.withColumn("spark_temp", lit("spark_write")).select(
-    #     col("repo.id").alias("repositories_id"),
-    #     col("repo.name").alias("name"),
-    #     col("repo.url").alias("url"),
-    #     col("spark_temp").alias("spark_temp")
-    # )
 
     # df_write_table.show()
 
@@ -70,7 +70,7 @@ def main():
     #write data to database
     # df_write.spark_write_mysql(df_write_table, spark_configs["mysql"]["table"], spark_configs["mysql"]["jdbc_url"], spark_configs["mysql"]["config"])
     # df_write.spark_write_mongodb(df_write_table, spark_configs["mongodb"]["uri"], spark_configs["mongodb"]["database"], spark_configs["mongodb"]["collection"])
-    # df_write.spark_write_all_database(df_write_table)
+    df_write.spark_write_all_database(df_write_table)
     # df_write_table.show()
 
     # #delete db to check
@@ -96,14 +96,14 @@ def main():
     4. insert các bản ghi đó vào bảng repositories
     5. delete bảng spark_table_temp
     """
-
-    df_write.spark_write_mysql_primary_key(df_write_table, "spark_table_temp", spark_configs["mysql"]["jdbc_url"],
-                               spark_configs["mysql"]["config"])
-    df_write.validate_spark_write_primary_key(df_write_table, "spark_table_temp", spark_configs["mysql"]["jdbc_url"],
-                                  spark_configs["mysql"]["config"])
-    df_write.insert_data_mysql_primary_key(spark_configs["mysql"]["config"])
-
-    # validate spark write data into mongodb
+    #
+    # df_write.spark_write_mysql_primary_key(df_write_table, "spark_table_temp", spark_configs["mysql"]["jdbc_url"],
+    #                            spark_configs["mysql"]["config"])
+    # df_write.validate_spark_write_primary_key(df_write_table, "spark_table_temp", spark_configs["mysql"]["jdbc_url"],
+    #                               spark_configs["mysql"]["config"])
+    # df_write.insert_data_mysql_primary_key(spark_configs["mysql"]["config"])
+    #
+    # # validate spark write data into mongodb
 
     # #delete db to check
     # with MongoDBConnect(spark_configs["mongodb"]["uri"], spark_configs["mongodb"]["database"]) as mongodb_client:
@@ -118,8 +118,8 @@ def main():
     #     if ids:
     #         result = mongodb_client.db.repositories.delete_many({"_id": {"$in": ids}})
     #     print("-----delete records to check validate spark write data into mongodb--------")
-
+    #
     # df_write.validate_spark_mongodb(df_write_table, spark_configs["mongodb"]["uri"], spark_configs["mongodb"]["database"], spark_configs["mongodb"]["collection"])
-
+    df_write.spark_validate_all_database(df_write_table)
 if __name__ == '__main__':
     main()
