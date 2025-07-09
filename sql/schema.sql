@@ -22,3 +22,17 @@ CREATE TABLE IF NOT EXISTS repositories(
     name VARCHAR(255) ,
     url VARCHAR(255)
 );
+CREATE TABLE IF NOT EXISTS repository_log_before(
+    repositories_id BIGINT ,
+    name VARCHAR(255) ,
+    url VARCHAR(255),
+    stage VARCHAR(255),
+    log_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS repository_log_after(
+    repositories_id BIGINT ,
+    name VARCHAR(255) ,
+    url VARCHAR(255) ,
+    stage VARCHAR(255) ,
+    log_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

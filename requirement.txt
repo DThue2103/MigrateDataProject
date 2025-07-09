@@ -4,3 +4,4 @@ mysql
 mysqlclient
 mysql-connector-python
 pymongo
+kafka-python

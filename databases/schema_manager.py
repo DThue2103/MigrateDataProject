@@ -47,11 +47,11 @@ def create_mysql_schema(connection, cursor):
 
             for i in range(len(sql_commands)):
                 if sql_commands[i] == key:
-                    table_name = re.sub(r'[^a-zA-Z0-9]', '', sql_commands[i + 1])
+                    table_name = re.sub(r'[^a-zA-Z0-9_]', '', sql_commands[i + 1])
                     tables_name.append(table_name)
 
                 elif sql_commands[i] == key1 and sql_commands[i + 1] != "IF":
-                    table_name = re.sub(r'[^a-zA-Z0-9]', '', sql_commands[i + 1])
+                    table_name = re.sub(r'[^a-zA-Z0-9_]', '', sql_commands[i + 1])
                     tables_name.append(table_name)
 
             # print(tables_name)

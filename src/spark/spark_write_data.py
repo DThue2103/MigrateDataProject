@@ -201,6 +201,7 @@ class SparkWriteDatabase:
             df_read = df_read.select("repositories_id", "name", "url", "spark_temp")
             # df_read.show()
             # df_write.show()
+
             df_temp = df_write.exceptAll(df_read)
             # df_temp.show()
             # print(df_temp.count())

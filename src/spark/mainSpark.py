@@ -62,7 +62,6 @@ def main():
     )
 
     # df_write_table.show()
-
     spark_configs = get_spark_config()
     # print(spark_configs)
     df_write = SparkWriteDatabase(spark_connect.spark, spark_configs)
