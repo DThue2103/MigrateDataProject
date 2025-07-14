@@ -21,8 +21,6 @@ def main(config):
         connection.commit()
         print("-------Inserted data to MySQL------")
         validate_mysql_schema(tables_name,connection, cursor)
-        #built trigger
-        built_mysql_trigger(connection, cursor)
     # #TH có primary key
     # with MySQLConnect(config["mysql"].host, config["mysql"].port, config["mysql"].user, config["mysql"].password) as mysql_client:
     #     #create table

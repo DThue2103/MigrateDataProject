@@ -27,12 +27,12 @@ CREATE TABLE IF NOT EXISTS repository_log_before(
     name VARCHAR(255) ,
     url VARCHAR(255),
     stage VARCHAR(255),
-    log_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    log_timestamp TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) PRIMARY KEY
 );
 CREATE TABLE IF NOT EXISTS repository_log_after(
     repositories_id BIGINT ,
     name VARCHAR(255) ,
     url VARCHAR(255) ,
     stage VARCHAR(255) ,
-    log_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    log_timestamp TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) PRIMARY KEY
 );

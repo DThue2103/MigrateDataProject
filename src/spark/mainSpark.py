@@ -67,9 +67,9 @@ def main():
     df_write = SparkWriteDatabase(spark_connect.spark, spark_configs)
 
     #write data to database
-    # df_write.spark_write_mysql(df_write_table, spark_configs["mysql"]["table"], spark_configs["mysql"]["jdbc_url"], spark_configs["mysql"]["config"])
+    df_write.spark_write_mysql(df_write_table, spark_configs["mysql"]["table"], spark_configs["mysql"]["jdbc_url"], spark_configs["mysql"]["config"])
     # df_write.spark_write_mongodb(df_write_table, spark_configs["mongodb"]["uri"], spark_configs["mongodb"]["database"], spark_configs["mongodb"]["collection"])
-    df_write.spark_write_all_database(df_write_table)
+    # df_write.spark_write_all_database(df_write_table)
     # df_write_table.show()
 
     # #delete db to check
@@ -85,7 +85,7 @@ def main():
     #     mysql_client.close()
 
     #validate spark write data into mysql
-    # df_write.validate_spark_mysql(df_write_table, spark_configs["mysql"]["table"], spark_configs["mysql"]["jdbc_url"], spark_configs["mysql"]["config"])
+    df_write.validate_spark_mysql(df_write_table, spark_configs["mysql"]["table"], spark_configs["mysql"]["jdbc_url"], spark_configs["mysql"]["config"])
 
     """
     TH có primary key và trong mysql đã có data:
@@ -119,6 +119,7 @@ def main():
     #     print("-----delete records to check validate spark write data into mongodb--------")
     #
     # df_write.validate_spark_mongodb(df_write_table, spark_configs["mongodb"]["uri"], spark_configs["mongodb"]["database"], spark_configs["mongodb"]["collection"])
-    df_write.spark_validate_all_database(df_write_table)
+    # df_write.spark_validate_all_database(df_write_table)
+
 if __name__ == '__main__':
     main()

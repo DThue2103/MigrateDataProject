@@ -5,6 +5,8 @@ from MigrateDataProject.databases.mysql_connect import MySQLConnect
 from MigrateDataProject.config.database_config import get_database_config
 
 from MigrateDataProject.databases.mongodb_connect import MongoDBConnect
+from MigrateDataProject.src.kafka.built_trigger import built_mysql_trigger
+
 
 class SparkWriteDatabase:
     def __init__(self, spark : SparkSession, db_config : Dict):
@@ -85,7 +87,9 @@ class SparkWriteDatabase:
                     cursor.execute(f"ALTER TABLE {table_name} DROP COLUMN spark_temp;")
                     connection.commit()
                     print("----- drop column spark_temp in mysql--------")
+                    built_mysql_trigger(connection, cursor)
                     mysql_client.close()
+
             except Exception as e:
                 raise Exception(f"-----failed to connect to mysql: {e}------")
 
