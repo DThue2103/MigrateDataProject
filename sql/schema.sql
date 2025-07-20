@@ -23,16 +23,18 @@ CREATE TABLE IF NOT EXISTS repositories(
     url VARCHAR(255)
 );
 CREATE TABLE IF NOT EXISTS repository_log_before(
-    repositories_id BIGINT ,
+    repositories_id BIGINT,
     name VARCHAR(255) ,
     url VARCHAR(255),
+    log_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     stage VARCHAR(255),
-    log_timestamp TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) PRIMARY KEY
+    log_timestamp TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3)
 );
 CREATE TABLE IF NOT EXISTS repository_log_after(
-    repositories_id BIGINT ,
+    repositories_id BIGINT,
     name VARCHAR(255) ,
     url VARCHAR(255) ,
+    log_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     stage VARCHAR(255) ,
-    log_timestamp TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) PRIMARY KEY
+    log_timestamp TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3)
 );
