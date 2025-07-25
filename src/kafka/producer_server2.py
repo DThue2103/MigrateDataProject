@@ -5,8 +5,6 @@ from MigrateDataProject.databases.mysql_connect import MySQLConnect
 from MigrateDataProject.config.database_config import get_database_config
 #truy vấn message
 
-
-#kafka A
 def get_data_trigger(mysql_client, last_log_id):
     connection, cursor = mysql_client.connection, mysql_client.cursor
     database = "github_data"
@@ -48,7 +46,7 @@ def main():
                 print(f"----------last_log_id = {last_log_id}------------")
                 for record in data:
                     producer.send("DE-ETL103", record)
-                    producer.flush()
+                producer.flush()
 
 
 

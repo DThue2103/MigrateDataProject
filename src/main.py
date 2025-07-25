@@ -44,16 +44,16 @@ def main(config):
     #         raise ValueError(f"-----table doesn't exist------")
     #     print("-------validated table successfully----")
     #
-    # #MONGODB
-    # with MongoDBConnect(config["mongodb"].uri, config["mongodb"].db_name) as mongodb_client:
-    #     create_mongodb_schema(mongodb_client.connect())
-    #     mongodb_client.db.repositories.insert_one({
-    #         "repositories_id": Int64(1),
-    #         "name": "Hue",
-    #         "url": "https://125jjvh.com"
-    #     })
-    #     print("-----insert one document to mongodb----")
-    #     validate_mongodb_schema(mongodb_client.connect())
+    #MONGODB
+    with MongoDBConnect(config["mongodb"].uri, config["mongodb"].db_name) as mongodb_client:
+        create_mongodb_schema(mongodb_client.connect())
+        mongodb_client.db.repositories.insert_one({
+            "repositories_id": Int64(1),
+            "name": "Hue",
+            "url": "https://125jjvh.com"
+        })
+        print("-----insert one document to mongodb----")
+        validate_mongodb_schema(mongodb_client.connect())
 if __name__ == '__main__':
     config = get_database_config()
     # print(config)
