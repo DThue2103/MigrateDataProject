@@ -9,8 +9,7 @@ consumer_server2 = KafkaConsumer("DE-ETL100",
                          bootstrap_servers = "localhost:9092")
 #kafka server2
 producer_server2 = KafkaProducer(bootstrap_servers="localhost:9092",
-                        value_serializer=lambda x: json.dumps(x).encode('utf-8')
-                         )
+                        value_serializer=lambda x: x.encode('utf-8'))
 
 while True:
     #gửi data từ server1 sang server2 (lấy dl từ topic DE-ETL103 gửi đến topic DE-ETL100)
