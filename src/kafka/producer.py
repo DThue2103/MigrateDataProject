@@ -31,7 +31,6 @@ def get_data_trigger(mysql_client, last_log_id):
 
     return data, max_log_id
 
-
 def main():
     last_log_id = None
     config = get_database_config()
@@ -46,11 +45,14 @@ def main():
                 data, max_log_id = get_data_trigger(mysql_client, last_log_id)
                 last_log_id = max_log_id
                 print(f"----------last_log_id = {last_log_id}------------")
-                for record in data:
-                    producer.send("DE-ETL103", record)
+
+                if data:
+                    producer.send("DE-ETL103", data)
                     producer.flush()
 
-
+                # for record in data:
+                #     producer.send("DE-ETL103", record)
+                # producer.flush()
 
 if __name__ == "__main__":
     main()
